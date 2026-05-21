@@ -505,6 +505,35 @@ spec:
     resourceClaimName: resourceClaimNameValue
     resourceClaimTemplateName: resourceClaimTemplateNameValue
   schedulerName: schedulerNameValue
+  securityContext:
+    appArmorProfile:
+      localhostProfile: localhostProfileValue
+      type: typeValue
+    fsGroup: 5
+    fsGroupChangePolicy: fsGroupChangePolicyValue
+    runAsGroup: 6
+    runAsNonRoot: true
+    runAsUser: 2
+    seLinuxChangePolicy: seLinuxChangePolicyValue
+    seLinuxOptions:
+      level: levelValue
+      role: roleValue
+      type: typeValue
+      user: userValue
+    seccompProfile:
+      localhostProfile: localhostProfileValue
+      type: typeValue
+    supplementalGroups:
+    - 4
+    supplementalGroupsPolicy: supplementalGroupsPolicyValue
+    sysctls:
+    - name: nameValue
+      value: valueValue
+    windowsOptions:
+      gmsaCredentialSpec: gmsaCredentialSpecValue
+      gmsaCredentialSpecName: gmsaCredentialSpecNameValue
+      hostProcess: true
+      runAsUserName: runAsUserNameValue
   startStrategy: startStrategyValue
   subdomain: subdomainValue
   terminationGracePeriodSeconds: -29

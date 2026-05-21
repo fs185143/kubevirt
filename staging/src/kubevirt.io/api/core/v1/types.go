@@ -195,6 +195,9 @@ type VirtualMachineInstanceSpec struct {
 	// +listMapKey=name
 	// +optional
 	UtilityVolumes []UtilityVolume `json:"utilityVolumes,omitempty"`
+	// SecurityContext holds pod-level security attributes for the VMI's virt-launcher pod.
+	// +optional
+	SecurityContext *k8sv1.PodSecurityContext `json:"securityContext,omitempty"`
 }
 
 func (vmiSpec *VirtualMachineInstanceSpec) UnmarshalJSON(data []byte) error {

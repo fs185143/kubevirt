@@ -6464,6 +6464,11 @@ func (in *VirtualMachineInstanceSpec) DeepCopyInto(out *VirtualMachineInstanceSp
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.SecurityContext != nil {
+		in, out := &in.SecurityContext, &out.SecurityContext
+		*out = new(corev1.PodSecurityContext)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

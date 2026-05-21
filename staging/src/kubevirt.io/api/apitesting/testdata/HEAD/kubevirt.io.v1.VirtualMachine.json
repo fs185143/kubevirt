@@ -981,7 +981,45 @@
             "readOnly": true,
             "type": "typeValue"
           }
-        ]
+        ],
+        "securityContext": {
+          "seLinuxOptions": {
+            "user": "userValue",
+            "role": "roleValue",
+            "type": "typeValue",
+            "level": "levelValue"
+          },
+          "windowsOptions": {
+            "gmsaCredentialSpecName": "gmsaCredentialSpecNameValue",
+            "gmsaCredentialSpec": "gmsaCredentialSpecValue",
+            "runAsUserName": "runAsUserNameValue",
+            "hostProcess": true
+          },
+          "runAsUser": 2,
+          "runAsGroup": 6,
+          "runAsNonRoot": true,
+          "supplementalGroups": [
+            4
+          ],
+          "supplementalGroupsPolicy": "supplementalGroupsPolicyValue",
+          "fsGroup": 5,
+          "sysctls": [
+            {
+              "name": "nameValue",
+              "value": "valueValue"
+            }
+          ],
+          "fsGroupChangePolicy": "fsGroupChangePolicyValue",
+          "seccompProfile": {
+            "type": "typeValue",
+            "localhostProfile": "localhostProfileValue"
+          },
+          "appArmorProfile": {
+            "type": "typeValue",
+            "localhostProfile": "localhostProfileValue"
+          },
+          "seLinuxChangePolicy": "seLinuxChangePolicyValue"
+        }
       }
     },
     "dataVolumeTemplates": [
