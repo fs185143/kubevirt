@@ -20,17 +20,17 @@
 package cgroup
 
 import (
-	"bytes"
+	"bufio"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"kubevirt.io/client-go/log"
 
-	cgroup_devices "github.com/opencontainers/runc/libcontainer/cgroups/devices"
 	"github.com/opencontainers/runc/libcontainer/devices"
 
 	runc_cgroups "github.com/opencontainers/runc/libcontainer/cgroups"
@@ -119,17 +119,70 @@ func getCurrentlyDefinedRules(runcManager runc_cgroups.Manager) ([]*devices.Rule
 		return nil, fmt.Errorf("error reading current rules: %v", err)
 	}
 
-	emulator, err := cgroup_devices.EmulatorFromList(bytes.NewBufferString(currentRulesStr))
+	currentRules, err := parseDevicesList(currentRulesStr)
 	if err != nil {
-		return nil, fmt.Errorf("error creating emulator out of current rules: %v", err)
-	}
-
-	currentRules, err := emulator.Rules()
-	if err != nil {
-		return nil, fmt.Errorf("error getting rules from emulator: %v", err)
+		return nil, fmt.Errorf("error parsing devices.list: %v", err)
 	}
 
 	return currentRules, nil
+}
+
+func parseDevicesList(data string) ([]*devices.Rule, error) {
+	var rules []*devices.Rule
+	s := bufio.NewScanner(strings.NewReader(data))
+	for s.Scan() {
+		line := s.Text()
+		if line == "" {
+			continue
+		}
+		fields := strings.FieldsFunc(line, func(r rune) bool {
+			return r == ' ' || r == ':'
+		})
+		if len(fields) != 4 {
+			return nil, fmt.Errorf("malformed devices.list rule %q", line)
+		}
+		rule := &devices.Rule{
+			Allow:       true,
+			Permissions: devices.Permissions(fields[3]),
+		}
+		switch fields[0] {
+		case "a":
+			rule.Type = devices.WildcardDevice
+			rule.Major = devices.Wildcard
+			rule.Minor = devices.Wildcard
+			rules = append(rules, rule)
+			continue
+		case "b":
+			rule.Type = devices.BlockDevice
+		case "c":
+			rule.Type = devices.CharDevice
+		default:
+			return nil, fmt.Errorf("unknown device type %q", fields[0])
+		}
+		if fields[1] == "*" {
+			rule.Major = devices.Wildcard
+		} else {
+			val, err := strconv.ParseInt(fields[1], 10, 64)
+			if err != nil {
+				return nil, fmt.Errorf("invalid major number: %w", err)
+			}
+			rule.Major = val
+		}
+		if fields[2] == "*" {
+			rule.Minor = devices.Wildcard
+		} else {
+			val, err := strconv.ParseInt(fields[2], 10, 64)
+			if err != nil {
+				return nil, fmt.Errorf("invalid minor number: %w", err)
+			}
+			rule.Minor = val
+		}
+		rules = append(rules, rule)
+	}
+	if err := s.Err(); err != nil {
+		return nil, fmt.Errorf("error reading devices.list: %w", err)
+	}
+	return rules, nil
 }
 
 func (v *v1Manager) GetCpuSet() (string, error) {
