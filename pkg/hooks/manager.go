@@ -27,7 +27,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 	"sync"
 	"time"
 
@@ -213,17 +212,25 @@ func processSideCarSocket(socketPath string) (*callBackClient, bool, error) {
 }
 
 func sortCallbacksPerHookPoint(callbacksPerHookPoint map[string][]*callBackClient) {
-	for _, callbacks := range callbacksPerHookPoint {
-		for _, callback := range callbacks {
-			sort.Slice(callback.subscribedHookPoints, func(i, j int) bool {
-				if callback.subscribedHookPoints[i].Priority == callback.subscribedHookPoints[j].Priority {
-					return strings.Compare(callback.subscribedHookPoints[i].Name, callback.subscribedHookPoints[j].Name) < 0
-				} else {
-					return callback.subscribedHookPoints[i].Priority > callback.subscribedHookPoints[j].Priority
-				}
-			})
+	for hookPointName, callbacks := range callbacksPerHookPoint {
+		sort.Slice(callbacks, func(i, j int) bool {
+			iPriority := getHookPointPriority(callbacks[i], hookPointName)
+			jPriority := getHookPointPriority(callbacks[j], hookPointName)
+			if iPriority == jPriority {
+				return callbacks[i].SocketPath < callbacks[j].SocketPath
+			}
+			return iPriority > jPriority
+		})
+	}
+}
+
+func getHookPointPriority(callback *callBackClient, hookPointName string) int32 {
+	for _, hookPoint := range callback.subscribedHookPoints {
+		if hookPoint.GetName() == hookPointName {
+			return hookPoint.Priority
 		}
 	}
+	return 0
 }
 
 func (m *hookManager) OnDefineDomain(domainSpec *virtwrapApi.DomainSpec, vmi *v1.VirtualMachineInstance) (string, error) {
