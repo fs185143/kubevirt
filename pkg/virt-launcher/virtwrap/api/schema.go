@@ -1269,6 +1269,7 @@ type Graphics struct {
 	Port          int32           `xml:"port,attr,omitempty"`
 	TLSPort       int             `xml:"tlsPort,attr,omitempty"`
 	Type          string          `xml:"type,attr"`
+	WebSocket     int32           `xml:"websocket,attr,omitempty"`
 }
 
 type GraphicsListen struct {
